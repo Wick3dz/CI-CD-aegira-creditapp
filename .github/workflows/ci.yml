@@ -1,0 +1,46 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Build & Deploy Application
+
+    runs-on:
+      - self-hosted
+      - aegira-creditapp-runner
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Show Runner Information
+        run: |
+          echo "Runner Name : $RUNNER_NAME"
+          docker --version
+          docker compose version
+
+      - name: Build Docker Images
+        run: docker compose build
+
+      - name: Start Containers
+        run: docker compose up -d
+
+      - name: Show Running Containers
+        run: docker compose ps
+
+      - name: Show Docker Containers
+        run: docker ps
+
+      - name: Backend Logs (if failed)
+        if: failure()
+        run: docker compose logs backend
+
+      - name: Frontend Logs (if failed)
+        if: failure()
+        run: docker compose logs frontend
