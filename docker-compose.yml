@@ -1,0 +1,97 @@
+services:
+  runner:
+      image: myoung34/github-runner:latest
+      container_name: github-runner
+      environment:
+          REPO_URL: https://github.com/Wick3dz/CI-CD-aegira-creditapp
+          RUNNER_NAME: aegira-creditapp-runner
+          RUNNER_TOKEN: A63LGEOYZX7R3GKCFOIZPOTKKOL2Y   # ganti dengan token
+          LABELS: docker-local
+      volumes:
+          - /var/run/docker.sock:/var/run/docker.sock
+          - ./runner-data:/runner/data
+      restart: unless-stopped
+  postgres:
+    image: postgres:14-alpine
+    container_name: aegira-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: aegira_loan
+      POSTGRES_USER: aegira
+      POSTGRES_PASSWORD: aegira_password
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aegira -d aegira_loan"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:5.0.3-alpine
+    container_name: aegira-loan-redis-new
+    restart: unless-stopped
+
+    command: redis-server --appendonly yes
+
+    ports:
+      - "6379:6379"
+
+    volumes:
+      - redis_data:/data
+
+  app:
+    build:
+      context: ./aegira-loan-service
+      dockerfile: Dockerfile
+
+    container_name: aegira-loan-services
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+    ports:
+      - "8080:8080"
+
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/aegira_loan
+      SPRING_DATASOURCE_USERNAME: aegira
+      SPRING_DATASOURCE_PASSWORD: aegira_password
+
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+      JWT_SECRET: change-this-secret
+      JWT_EXPIRATION: 3600000
+
+      LOAN_DATA_SOURCE_MODE: DATABASE
+      IDEMPOTENCY_ENABLED: "true"
+      IDEMPOTENCY_TTL_SECONDS: 86400
+
+  creditapp:
+    build:
+      context: ./creditappdemo
+      dockerfile: Dockerfile
+
+    container_name: creditappdemo
+
+    depends_on:
+      - app
+
+    ports:
+      - "80:80"
+
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
