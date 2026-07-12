@@ -39,8 +39,8 @@ jobs:
 
       - name: Backend Logs (if failed)
         if: failure()
-        run: docker compose logs backend
+        run: docker compose logs app
 
       - name: Frontend Logs (if failed)
         if: failure()
-        run: docker compose logs frontend
+        run: docker compose logs creditapp
