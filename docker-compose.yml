@@ -1,12 +1,12 @@
 services:
   runner:
       image: myoung34/github-runner:latest
-      container_name: github-runner
+      container_name: github-runner-aegira
       environment:
           REPO_URL: https://github.com/Wick3dz/CI-CD-aegira-creditapp
           RUNNER_NAME: aegira-creditapp-runner
           RUNNER_TOKEN: A63LGEI7MS62FW443QZHHNTKKOOMC   # ganti dengan token
-          LABELS: docker-local
+          LABELS: aegira-creditapp-runner
       volumes:
           - /var/run/docker.sock:/var/run/docker.sock
           - ./runner-data:/runner/data
