@@ -91,3 +91,4 @@ jobs:
       - name: Frontend Logs
         if: failure()
         run: docker compose logs creditapp
+        
