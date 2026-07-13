@@ -64,18 +64,18 @@ services:
       IDEMPOTENCY_ENABLED: "true"
       IDEMPOTENCY_TTL_SECONDS: 86400
 
-creditapp:
-  image: dhimasbagus/creditappdemo:latest
+  creditapp:
+    image: dhimasbagus/creditappdemo:latest
 
-  container_name: creditappdemo
+    container_name: creditappdemo
 
-  depends_on:
-    - app
+    depends_on:
+      - aegira
 
-  ports:
-    - "80:80"
+    ports:
+      - "80:80"
 
-  restart: unless-stopped
+    restart: unless-stopped
 
 volumes:
   postgres_data:
